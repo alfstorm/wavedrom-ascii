@@ -89,7 +89,8 @@ class VectorWaveform(Waveform):
         prev = None
         last_cycle = None
         waves = deque(wave)
-        data = data.split(" ")
+        if isinstance(data, str):
+            data = data.split(" ")
         while waves:
             cycle = waves.popleft()
 
