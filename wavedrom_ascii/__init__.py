@@ -25,8 +25,11 @@ class Waveform:
 
     def __init__(self):
         self._cycles = []
+        self._name = ""
 
-    def parse_waveform(self, wave, data=None):
+    def parse_waveform(self, name, wave, data=None):
+        self._name = name
+
         if wave[0] == "p":
             self._cycles = [("rise", "fall") for _ in range(len(wave))]
         else:
@@ -79,13 +82,19 @@ class Waveform:
             botline += self.symbol_bot.get(negedge, "     ")
         return botline
 
+    @property
+    def name(self):
+        return self._name
+
 
 class VectorWaveform(Waveform):
     change_top = "╥"
     change_mid = "║"
     change_bot = "╨"
 
-    def parse_waveform(self, wave, data):
+    def parse_waveform(self, name, wave, data):
+        self._name = name
+
         prev = None
         last_cycle = None
         waves = deque(wave)
@@ -187,7 +196,7 @@ class WavedromASCII:
     }
 
     def __init__(self):
-        self._waves = {}
+        self._waves = []
 
     @classmethod
     def from_dict(cls, data):
@@ -204,30 +213,30 @@ class WavedromASCII:
             return wave
 
     def add_wave(self, name, wave, data=None):
-        self._waves[name] = self._parse_wavedrom_wave(wave, data)
+        self._waves.append(self._parse_wavedrom_wave(name, wave, data))
 
-    def _parse_wavedrom_wave(self, wave: str, data):
+    def _parse_wavedrom_wave(self, name, wave: str, data):
         if any(w in self.vector_symbols for w in wave):
             cls = VectorWaveform
         else:
             cls = Waveform
         form = cls()
-        form.parse_waveform(wave, data)
+        form.parse_waveform(name, wave, data)
         return form
 
     def __str__(self):
-        max_key = max(len(key) for key in self._waves.keys())
+        max_name = max(len(waveform.name) for waveform in self._waves)
         output = []
-        for name, waveform in self._waves.items():
-            topline = f"  {' ':{max_key}s}  "
+        for waveform in self._waves:
+            topline = f"  {' ':{max_name}s}  "
             topline += waveform.topline
 
             if isinstance(waveform, VectorWaveform):
-                midline = f"  {name:{max_key}s}  "
-                botline = f"  {' ':{max_key}s}  "
+                midline = f"  {waveform.name:{max_name}s}  "
+                botline = f"  {' ':{max_name}s}  "
             else:
                 midline = ""
-                botline = f"  {name:{max_key}s}  "
+                botline = f"  {waveform.name:{max_name}s}  "
 
             midline += waveform.midline
             botline += waveform.botline
