@@ -123,7 +123,7 @@ class VectorWaveform(Waveform):
                         posedge = "change"
                         negedge = "hold"
                         value = data.pop(0)
-                    elif cycle in "23456789":
+                    elif cycle in "=23456789":
                         posedge = "change"
                         negedge = "hold"
                         value = data.pop(0)
@@ -185,6 +185,7 @@ class VectorWaveform(Waveform):
 class WavedromASCII:
     vector_symbols = {
         "x",
+        "=",
         "2",
         "3",
         "4",
